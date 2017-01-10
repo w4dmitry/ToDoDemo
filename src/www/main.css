@@ -1,0 +1,65 @@
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.category-tree {
+    margin: 0;
+    padding: 0;
+}
+.category-tree ul {
+    margin: 0;
+    padding: 0 0 0 14px;
+}
+.category-tree li {
+    list-style-type: none;
+}
+.category-tree a {
+    cursor: pointer;
+}
+.category-tree li.selected > a {
+    background-color: #26C6DA;
+    color: #FFF;
+    padding: 0 0px;
+}
+.category-tree div.selected {
+    background-color: #26C6DA;
+    color: #FFF;
+    padding: 0 0px;
+}
+.category-tree li:before {
+    content: "";
+    display: block;
+    float:left;
+    width:16px;
+    height:16px;
+    margin-top: 12px;
+}
+.category-tree .has-children:before {
+    content: url('/Images/ArrowRight.svg');
+    cursor: pointer;
+    display: block;
+    float:left;
+}
+.category-tree .has-children.open:before {
+    content: url('/Images/ArrowRight.svg');
+    transform: rotateZ(90deg);
+    cursor: pointer;
+    display: block;
+    float:left;
+}
+.category-tree .has-children.always-open:before {
+    border: 1px solid black;
+    content: "";
+    cursor: default;
+}
