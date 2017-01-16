@@ -50,6 +50,7 @@ body {
     cursor: pointer;
     display: block;
     float:left;
+    width: 24px;
 }
 .category-tree .has-children.open:before {
     content: url('/Images/ArrowRight.svg');

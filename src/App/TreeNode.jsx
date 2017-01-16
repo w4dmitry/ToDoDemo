@@ -7,7 +7,11 @@ export default class TreeNode extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {children: []};
+
+        this.state = {children: [], isRootElement: false};
+
+        if(!('key' in this.props))
+            this.state.isRootElement = true;
     }
 
     onCategorySelect(ev) {
@@ -33,12 +37,18 @@ export default class TreeNode extends Component {
         ev.stopPropagation();
     }
 
+    onAdd() {
+
+        if(this.props.onAdd)
+            this.props.onAdd(this.props.data.id)
+    }
+
     render() {
         
         if (!this.state.children)
             this.state.children = [];
 
-        const classes = classNames({
+       const classes = classNames({
             'has-children': (this.props.data.children ? true : false),
             'open':         (this.state.children.length ? true : false),
             'closed':       (this.state.children ? false : true),
@@ -50,48 +60,38 @@ export default class TreeNode extends Component {
         });
 
 
-        if(!this.props.data.name)
-        {
-                return (
-                <div>
-                    {this.props.data.children.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.props.onCategorySelect}/>)}
-                </div>
-            )
+        return (
 
-        } else {
-
-            return (
-
-                <li onClick={this.onChildDisplayToggle.bind(this)} className={classes} ref="node">
-
-                    <div style={{height:'40px', display: 'flex', justifyContent: 'space-between'}}  onClick={this.onCategorySelect.bind(this)} data-id={this.props.data.id}>
-                        <div style={{alignSelf: 'center'}}>
+            <li onClick={this.onChildDisplayToggle.bind(this)} className={classes} ref="node">
+            
+                <div onClick={this.onCategorySelect.bind(this)} style={{height:'40px', display: 'flex', justifyContent: 'space-between'}} data-id={this.props.data.id}>
+                    
+                    <div style={{alignSelf: 'center'}}>
                         <div className={divClasses} style={{display:'inline-block', verticalAlign:'middle', fontSize: '18px', padding:'10px'}}>{this.props.data.name}</div>
+
                         <IconButton tooltip="Edit task" style={{display:'inline-block', verticalAlign:'middle'}}>
-                                <FontIcon className="material-icons" style={{fontSize: '12px'}}>edit</FontIcon>
-                            </IconButton>
-                        </div>
-                        <div style={{alignSelf: 'center' }}>
-                        <IconButton tooltip="Delete task" style={{display:'inline-block', verticalAlign:'middle'}}>
-                                <FontIcon className="material-icons" style={{fontSize: '12px'}}>delete</FontIcon>
-                            </IconButton>
-                        <IconButton tooltip="Add task" style={{display:'inline-block', verticalAlign:'middle'}}>
-                                <FontIcon className="material-icons" style={{fontSize: '12px'}}>add</FontIcon>
-                            </IconButton>
-                        </div>
+                            <FontIcon className="material-icons" style={{fontSize: '12px'}}>edit</FontIcon>
+                        </IconButton>
                     </div>
 
-                    <ul>
-                        {this.state.children.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.props.onCategorySelect}/>)}
-                    </ul>
-                </li>
-            )
+                
+                    <div style={{alignSelf: 'center'}}>
 
-        }
+                        <IconButton tooltip="Delete task" style={{display:'inline-block', verticalAlign:'middle'}}>
+                            <FontIcon className="material-icons" style={{fontSize: '12px'}}>delete</FontIcon>
+                        </IconButton>
 
+                        <IconButton tooltip="Add task" style={{display:'inline-block', verticalAlign:'middle'}} onClick={this.onAdd.bind(this)}>
+                            <FontIcon className="material-icons" style={{fontSize: '12px'}}>add</FontIcon>
+                        </IconButton>
+                    </div>
 
+                </div>
 
-
-
+                <ul>
+                    {this.state.children.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.props.onCategorySelect}/>)}
+                </ul>
+            </li>
+        )
     }
 }

@@ -24,7 +24,7 @@ export default class Tree extends Component {
             <div className="panel panel-default">
                 <div className="panel-body">
                     <ul className="category-tree">
-                        <TreeNode key={this.state.data.id} data={this.state.data} onCategorySelect={this.onSelect.bind(this)}/>
+                        {this.state.data.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.onSelect.bind(this)} onAdd={this.props.onAdd}/>)}
                     </ul>
                 </div>
             </div>
