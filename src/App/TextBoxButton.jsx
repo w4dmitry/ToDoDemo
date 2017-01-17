@@ -8,7 +8,6 @@ export default class TextBoxButton extends Component {
         super(props);
 
         this.state = {hint: props.hint, name: props.name, message:''};
-        
     }
 
     onAdd(){

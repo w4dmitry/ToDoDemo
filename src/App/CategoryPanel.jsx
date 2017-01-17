@@ -19,7 +19,7 @@ export default class CategoryPanel extends Component {
                 <TextBoxButton name="Add" hint="Add new category" onAdd={this.props.onAdd}></TextBoxButton>
 
                 <div style={{alignSelf: 'top', borderRight:'1px solid gray', paddingRight:'15px', marginTop:30}}>
-                    <Tree data={this.state.data} onAdd={this.props.onAddSubCategory}/>
+                    <Tree data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove}/>
                 </div>
 
               </div>

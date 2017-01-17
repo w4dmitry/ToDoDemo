@@ -8,10 +8,9 @@ export default class TreeNode extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {children: [], isRootElement: false};
+        this.state = {children: []};
 
-        if(!('key' in this.props))
-            this.state.isRootElement = true;
+                console.log(this.props);
     }
 
     onCategorySelect(ev) {
@@ -43,13 +42,19 @@ export default class TreeNode extends Component {
             this.props.onAdd(this.props.data.id)
     }
 
+    onRemove() {
+
+        if(this.props.onRemove)
+            this.props.onRemove(this.props.data.id)
+    }
+
     render() {
         
         if (!this.state.children)
             this.state.children = [];
 
        const classes = classNames({
-            'has-children': (this.props.data.children ? true : false),
+            'has-children': (this.props.data.children && this.props.data.children.length >0 ? true : false),
             'open':         (this.state.children.length ? true : false),
             'closed':       (this.state.children ? false : true),
             'selected':     (this.state.selected ? true : false)
@@ -77,11 +82,11 @@ export default class TreeNode extends Component {
                 
                     <div style={{alignSelf: 'center'}}>
 
-                        <IconButton tooltip="Delete task" style={{display:'inline-block', verticalAlign:'middle'}}>
+                        <IconButton tooltip="Delete task" style={{display:'inline-block', verticalAlign:'middle'}} onClick={() => this.onRemove()}>
                             <FontIcon className="material-icons" style={{fontSize: '12px'}}>delete</FontIcon>
                         </IconButton>
 
-                        <IconButton tooltip="Add task" style={{display:'inline-block', verticalAlign:'middle'}} onClick={this.onAdd.bind(this)}>
+                        <IconButton tooltip="Add task" style={{display:'inline-block', verticalAlign:'middle'}} onClick={() => this.onAdd()}>
                             <FontIcon className="material-icons" style={{fontSize: '12px'}}>add</FontIcon>
                         </IconButton>
                     </div>
@@ -89,7 +94,7 @@ export default class TreeNode extends Component {
                 </div>
 
                 <ul>
-                    {this.state.children.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.props.onCategorySelect}/>)}
+                    {this.state.children.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.props.onCategorySelect} onAdd={this.props.onAdd} onRemove={this.props.onRemove} />)}
                 </ul>
             </li>
         )

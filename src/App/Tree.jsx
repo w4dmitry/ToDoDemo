@@ -6,6 +6,9 @@ export default class Tree extends Component {
     constructor(props) {
         super(props);
         this.state = {data: props.data};
+
+        console.log("TREE");
+        console.log(this.props);
     }
 
     onSelect(node) {
@@ -24,7 +27,7 @@ export default class Tree extends Component {
             <div className="panel panel-default">
                 <div className="panel-body">
                     <ul className="category-tree">
-                        {this.state.data.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.onSelect.bind(this)} onAdd={this.props.onAdd}/>)}
+                        {this.state.data.map(child => <TreeNode key={child.id} data={child} onCategorySelect={this.onSelect.bind(this)} onAdd={this.props.onAdd} onRemove={this.props.onRemove} />)}
                     </ul>
                 </div>
             </div>
