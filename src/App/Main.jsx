@@ -208,8 +208,6 @@ export class Main extends Component {
 
   onRemove(id) {
 
-    console.log("TOP LEVEL: " + id);
-      
     var newData = this.state.data;
 
     var result = this.removeCategory(id, newData);
@@ -219,12 +217,6 @@ export class Main extends Component {
       this.id = 0;
       this.enumerateCategories(newData);
     }
-
-      
-
-    console.log(newData);
-    console.log(this.names);
-    console.log(this.id);
 
     this.setState({ data: newData });
   }

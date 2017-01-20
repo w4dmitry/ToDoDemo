@@ -3,6 +3,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import Tree from './Tree';
 import TextBoxButton from './TextBoxButton';
+import MessagePanel from './MessagePanel';
 
 export default class CategoryPanel extends Component {
 
@@ -19,7 +20,7 @@ export default class CategoryPanel extends Component {
                 <TextBoxButton name="Add" hint="Add new category" onAdd={this.props.onAdd}></TextBoxButton>
 
                 <div style={{alignSelf: 'top', borderRight:'1px solid gray', paddingRight:'15px', marginTop:30}}>
-                    <Tree data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove}/>
+                    {this.state.data.length === 0 ? <MessagePanel value="Add category"/> : <Tree data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove}/>}
                 </div>
 
               </div>
