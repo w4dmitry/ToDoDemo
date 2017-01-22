@@ -8,6 +8,7 @@ export default class ModalDialogOkCancel extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       open: props.open,
       message: props.message,

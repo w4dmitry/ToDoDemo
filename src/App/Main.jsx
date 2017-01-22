@@ -44,14 +44,23 @@ export class Main extends Component {
       hintMsgCategoryEmptyName: 'Category name is empty!',
       // Modal Dialog
       modalDialogTitleNewCategory: 'New category',
-      modalDialogMessageCategoryName: 'Enter new category name'
+      modalDialogMessageCategoryName: 'Enter new category name',
+      modalDialogTitleEditCategory: 'Edit category',
+      modalDialogMessageEditCategoryName: 'Edit category name'
+    };
+
+    this.ModalDialogMode = {
+      ADD: 1,
+      EDIT: 2
     };
 
     this.names = [];
     this.id = 0;
+    this.taskId = 0;
 
     this.state = {
       data: [],
+      selectedCategory: null,
       hintPopup: {
         open: false,
         message: '',
@@ -59,6 +68,7 @@ export class Main extends Component {
       },
       modalDialog: {
         open: false,
+        mode: this.ModalDialogMode.ADD,
         title: '',
         message: '',
         names: [],
@@ -68,9 +78,28 @@ export class Main extends Component {
 
   }
 
+  enumerateTasks(categories) {
+
+    for (var index1 = 0; index1 < categories.length; index1++) {
+
+      var category = categories[index1];
+
+      for (var index2 = 0; index2 < category.tasks.length; index2++) {
+        let task  = category.tasks[index2];
+        
+        if(task.id > this.taskId)
+          this.taskId = task.id;
+      }
+
+      if (category.children.length > 0)
+        this.enumerateCategories(category.children);
+    }
+  }
+
+
   enumerateCategories(categories) {
 
-    for(var index=0; index < categories.length; index++) {
+    for (var index = 0; index < categories.length; index++) {
 
       var category = categories[index];
 
@@ -86,7 +115,7 @@ export class Main extends Component {
 
   findCategory(id, categories) {
 
-    for(var index=0; index < categories.length; index++) {
+    for (var index = 0; index < categories.length; index++) {
       var category = categories[index];
 
       if (category.id === id)
@@ -104,24 +133,23 @@ export class Main extends Component {
     return null;
   }
 
-   removeCategory(id, categories) {
+  removeCategory(id, categories) {
 
     let removeCategoryIndex = -1;
 
-    for(let index=0; index < categories.length; index++) {
+    for (let index = 0; index < categories.length; index++) {
 
-      console.log(index);
       if (categories[index].id === id) {
         removeCategoryIndex = index;
         break;
       }
 
       if (categories[index].children.length > 0)
-        if(this.removeCategory(id, categories[index].children) === true)
+        if (this.removeCategory(id, categories[index].children) === true)
           return true;
     }
 
-    if(removeCategoryIndex === -1)
+    if (removeCategoryIndex === -1)
       return false;
 
     categories.splice(removeCategoryIndex, 1);
@@ -134,7 +162,7 @@ export class Main extends Component {
       return;
 
     var newId = ++this.id;
-    var newCategory = { name: name, id: newId, children: [] };
+    var newCategory = { name: name, id: newId, tasks:[], children: [] };
     var newData = this.state.data;
 
     if (id === 0) {
@@ -153,6 +181,23 @@ export class Main extends Component {
 
     this.names.unshift(name);
     this.setState({ data: newData, id: newId });
+  }
+
+  editCategory(id, name) {
+
+    if (!this.checkCategoryName(name))
+      return;
+
+    let newData = this.state.data;
+    let category = this.findCategory(id, newData);
+
+    if (category === null)
+      return;
+
+    category.name = name;
+    this.enumerateCategories(newData);
+
+    this.setState({ data: newData });
   }
 
   checkCategoryName(name) {
@@ -187,6 +232,25 @@ export class Main extends Component {
     return true;
   }
 
+  onEdit(id) {
+
+    var category = this.findCategory(id, this.state.data);
+
+    if (!category)
+      return;
+
+    this.setState({
+      modalDialog: {
+        open: true,
+        mode: this.ModalDialogMode.EDIT,
+        title: this.constants.modalDialogTitleEditCategory,
+        message: this.constants.modalDialogMessageEditCategoryName,
+        names: this.names,
+        value: category.name,
+        id: id
+      }
+    })
+  }
 
   onAdd(categoryName) {
 
@@ -198,6 +262,7 @@ export class Main extends Component {
     this.setState({
       modalDialog: {
         open: true,
+        mode: this.ModalDialogMode.ADD,
         title: this.constants.modalDialogTitleNewCategory,
         message: this.constants.modalDialogMessageCategoryName,
         names: this.names,
@@ -212,19 +277,46 @@ export class Main extends Component {
 
     var result = this.removeCategory(id, newData);
 
-    if(result === true) {
+    if (result === true) {
       this.names = [];
       this.id = 0;
       this.enumerateCategories(newData);
     }
 
-    this.setState({ data: newData });
+    this.setState({ data: newData, selectedCategory: null });
+  }
+
+  onSelected(id) {
+
+    var category = this.findCategory(id, this.state.data);
+
+    if (!category)
+      return;
+
+    this.setState({ selectedCategory: category });
+
+  }
+
+  addTask(id, task) {
+   this.enumerateTasks(this.state.data);
   }
 
   dialogResultCallback(result) {
 
-    if(result.Confirmed === true)
-      this.addCategory(this.state.modalDialog.id, result.Result);
+    if (result.Confirmed === true) {
+
+      switch (this.state.modalDialog.mode) {
+        case this.ModalDialogMode.ADD:
+          this.addCategory(this.state.modalDialog.id, result.Result);
+          break;
+        case this.ModalDialogMode.EDIT:
+          this.editCategory(this.state.modalDialog.id, result.Result);
+          break;
+        default:
+          break;
+      }
+    }
+
 
     this.setState({
       modalDialog: {
@@ -275,11 +367,13 @@ export class Main extends Component {
                   data={this.state.data}
                   onAdd={msg => this.onAdd(msg)}
                   onAddSubCategory={id => this.onAddSubCategory(id)}
-                  onRemove={id => this.onRemove(id)}/>
+                  onRemove={id => this.onRemove(id)}
+                  onEdit={id => this.onEdit(id)}
+                  onCategorySelect={id => this.onSelected(id)} />
               </div>
 
               <div style={{ alignSelf: 'top', width: '50%' }}>
-                <TaskPanel></TaskPanel>
+                {this.state.selectedCategory !== null ? <TaskPanel data={this.state.selectedCategory.tasks} categoryId={this.state.selectedCategory.id} taskId={this.taskId} addTask={(id,task) => this.addTask(id, task)}/> : null }
               </div>
 
             </div>
@@ -293,6 +387,7 @@ export class Main extends Component {
             open={this.state.modalDialog.open}
             title={this.state.modalDialog.title}
             message={this.state.modalDialog.message}
+            value={this.state.modalDialog.value}
             asyncDialogResultCallback={(result) => this.dialogResultCallback(result)} />
 
         </div>
