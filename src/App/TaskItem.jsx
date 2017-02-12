@@ -4,12 +4,6 @@ import FontIcon from 'material-ui/FontIcon';
 import Checkbox from 'material-ui/Checkbox';
 import { List, ListItem } from 'material-ui/List';
 
-const rightEditButton = (
-    <IconButton tooltip="Edit task" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-        <FontIcon className="material-icons" style={{ fontSize: '12px' }}>edit</FontIcon>
-    </IconButton>
-);
-
 export default class TaskItem extends Component {
 
     constructor(props) {
@@ -19,12 +13,21 @@ export default class TaskItem extends Component {
 
     }
 
+    onEdit() {
 
-        render() {
+        if (this.props.editTask)
+            this.props.editTask(this.props.data.id);
+    }
+
+    render() {
         return (
             <ListItem style={{borderBottom:'1px solid lightgray'}}
-                            leftCheckbox={<Checkbox defaultChecked={this.state.data.done} />}
-                            rightIconButton={rightEditButton}
+                            leftCheckbox={<Checkbox checked={this.state.data.done} />}
+                            rightIconButton={(
+                                <IconButton tooltip="Edit task" style={{ display: 'inline-block', verticalAlign: 'middle' }}  onClick={() => this.onEdit()}>
+                                    <FontIcon className="material-icons" style={{ fontSize: '12px' }}>edit</FontIcon>
+                                </IconButton>
+                            )}
                             primaryText={this.state.data.name} />
        );
     }

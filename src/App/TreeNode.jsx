@@ -3,14 +3,23 @@ import classNames from 'classnames';
 import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
 
+import {TREE_MODE} from './Consts';
+
 export default class TreeNode extends Component {
 
     constructor(props) {
         super(props);
 
-        this.state = { children: [] };
+        this.state = { children: [], mode: props.mode };
     }
 
+    componentWillReceiveProps(nextProps) {
+        
+        this.setState({
+            mode: nextProps.mode
+        });
+    }
+    
     onCategorySelect(ev) {
 
         if (this.props.onCategorySelect) {
@@ -37,19 +46,19 @@ export default class TreeNode extends Component {
     onAdd() {
 
         if (this.props.onAdd)
-            this.props.onAdd(this.props.data.id)
+            this.props.onAdd(this.props.data.id);
     }
 
     onRemove() {
 
         if (this.props.onRemove)
-            this.props.onRemove(this.props.data.id)
+            this.props.onRemove(this.props.data.id);
     }
 
     onEdit() {
 
         if (this.props.onEdit)
-            this.props.onEdit(this.props.data.id)
+            this.props.onEdit(this.props.data.id);
     }
 
     render() {
@@ -78,21 +87,34 @@ export default class TreeNode extends Component {
                     <div style={{ alignSelf: 'center' }}>
                         <div className={divClasses} style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '18px', padding: '10px' }}>{this.props.data.name}</div>
 
-                        <IconButton tooltip="Edit task" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onEdit()}>
-                            <FontIcon className="material-icons" style={{ fontSize: '12px' }}>edit</FontIcon>
-                        </IconButton>
+                        {this.state.mode === TREE_MODE.NODE_BUILD ?
+                            <IconButton tooltip="Edit category" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onEdit()}>
+                                <FontIcon className="material-icons" style={{ fontSize: '12px' }}>edit</FontIcon>
+                            </IconButton>
+                            :
+                            null
+                        }
                     </div>
 
 
                     <div style={{ alignSelf: 'center' }}>
 
-                        <IconButton tooltip="Delete task" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onRemove()}>
-                            <FontIcon className="material-icons" style={{ fontSize: '12px' }}>delete</FontIcon>
-                        </IconButton>
+                        {this.state.mode === TREE_MODE.NODE_BUILD ?
+                            <div>
+                                <IconButton tooltip="Delete category" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onRemove()}>
+                                    <FontIcon className="material-icons" style={{ fontSize: '12px' }}>delete</FontIcon>
+                                </IconButton>
 
-                        <IconButton tooltip="Add task" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onAdd()}>
-                            <FontIcon className="material-icons" style={{ fontSize: '12px' }}>add</FontIcon>
-                        </IconButton>
+                                <IconButton tooltip="Add category" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onAdd()}>
+                                    <FontIcon className="material-icons" style={{ fontSize: '12px' }}>add</FontIcon>
+                                </IconButton>
+                            </div>
+                            :
+                            <IconButton tooltip="Move to this category" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onMove()}>
+                                <FontIcon className="material-icons" style={{ fontSize: '12px' }}>turned_in</FontIcon>
+                            </IconButton>
+                        }
+
                     </div>
 
                 </div>
@@ -100,6 +122,7 @@ export default class TreeNode extends Component {
                 <ul>
                     {this.state.children.map(child =>
                         <TreeNode
+                            mode={this.state.mode}
                             key={child.id}
                             data={child}
                             onCategorySelect={this.props.onCategorySelect}

@@ -14,13 +14,17 @@ import Paper from 'material-ui/Paper';
 import Toggle from 'material-ui/Toggle';
 import Divider from 'material-ui/Divider';
 
-import TaskPanel from './TaskPanel';
+import TaskShowPanel from './TaskShowPanel';
+import TaskEditPanel from './TaskEditPanel';
+
 import CategoryPanel from './CategoryPanel';
 import ModalDialogOkCancel from './ModalDialogOkCancel';
 
 import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
 import Snackbar from 'material-ui/Snackbar';
+
+import {TREE_MODE} from './Consts';
 
 const styles = {
   container: {
@@ -61,6 +65,8 @@ export class Main extends Component {
     this.state = {
       data: [],
       selectedCategory: null,
+      mode: TREE_MODE.NODE_BUILD,
+      task: null,
       hintPopup: {
         open: false,
         message: '',
@@ -96,6 +102,32 @@ export class Main extends Component {
     }
   }
 
+  findTask(id, categories) {
+
+    for (let index = 0; index < categories.length; index++) {
+
+      let category = categories[index];
+
+      for (let index2 = 0; index2 < category.tasks.length; index2++) {
+
+        let task  = category.tasks[index2];
+        
+        if(task.id === id)
+          return task;
+      }
+
+      if (category.children.length > 0) {
+
+        var result = this.findTask(id, category.children);
+
+        if (result !== null)
+          return result;
+      }
+
+    }
+
+    return null;
+  }
 
   enumerateCategories(categories) {
 
@@ -317,12 +349,49 @@ export class Main extends Component {
       }
     }
 
-
     this.setState({
       modalDialog: {
         open: false
       }
     })
+  }
+
+  onToggle(event, state)
+  {
+      let mode = TREE_MODE.NODE_BUILD;
+      if(state === false)
+        mode = TREE_MODE.NODE_SELECT;
+      this.setState({
+        mode: mode
+      })        
+  }
+
+  editTask(id) {
+
+      this.setState({
+        mode: TREE_MODE.NODE_SELECT,
+        task: this.findTask(id, this.state.data)
+      })
+  }
+
+  saveTask(task) {
+    
+    let prevTask = this.findTask(task.id, this.state.data);
+
+    prevTask.name = task.name;
+    prevTask.description = task.description;
+    prevTask.done = task.done;
+
+     this.setState({
+        mode: TREE_MODE.NODE_BUILD
+      })
+    
+  }
+  
+  cancelTask() {
+      this.setState({
+        mode: TREE_MODE.NODE_BUILD
+      })
   }
 
   render() {
@@ -342,7 +411,7 @@ export class Main extends Component {
 
               <div style={{ alignSelf: 'center' }}>
                 <div style={{ width: 200, display: 'inline-block', verticalAlign: 'middle' }}>
-                  <Toggle label="Show done" labelPosition="right" defaultToggled={true} style={{ fontSize: '18px' }} />
+                  <Toggle label="Show done" labelPosition="right" defaultToggled={true} style={{ fontSize: '18px' }} onToggle={(event, state) => this.onToggle(event, state)} />
                 </div>
                 <div style={{ width: 200, display: 'inline-block', verticalAlign: 'middle' }}>
                   <TextField style={{ width: 200, fontSize: '18px' }} hintText="Task filter" />
@@ -364,6 +433,7 @@ export class Main extends Component {
 
               <div style={{ alignSelf: 'top', width: '50%' }}>
                 <CategoryPanel
+                  mode={this.state.mode}
                   data={this.state.data}
                   onAdd={msg => this.onAdd(msg)}
                   onAddSubCategory={id => this.onAddSubCategory(id)}
@@ -373,7 +443,21 @@ export class Main extends Component {
               </div>
 
               <div style={{ alignSelf: 'top', width: '50%' }}>
-                {this.state.selectedCategory !== null ? <TaskPanel data={this.state.selectedCategory.tasks} categoryId={this.state.selectedCategory.id} taskId={this.taskId} addTask={(id,task) => this.addTask(id, task)}/> : null }
+                {this.state.selectedCategory !== null ?
+                
+                   (this.state.mode === TREE_MODE.NODE_BUILD ?
+                      <TaskShowPanel
+                          data={this.state.selectedCategory.tasks}
+                          categoryId={this.state.selectedCategory.id}
+                          taskId={this.taskId}
+                          addTask={(id,task) => this.addTask(id, task)}
+                          editTask={(id) => this.editTask(id)}/>
+                      :
+                      <TaskEditPanel task={this.state.task} saveChanges={task => this.saveTask(task)} cancleChanges={() => this.cancelTask()}/>
+                   )
+                  :
+                  null
+                }
               </div>
 
             </div>

@@ -9,9 +9,18 @@ export default class CategoryPanel extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {data: props.data};
+        this.state = {data: props.data, mode: props.mode};
     }
 
+    componentWillReceiveProps(nextProps) {
+        
+        this.setState({
+            mode: nextProps.mode
+        });
+
+        console.log(nextProps);
+    }
+    
     render() {
         
         return (
@@ -23,7 +32,7 @@ export default class CategoryPanel extends Component {
                     {this.state.data.length === 0 ?
                          <MessagePanel value="Add category"/>
                          :
-                         <Tree data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove} onEdit={this.props.onEdit} onCategorySelect={this.props.onCategorySelect}/>
+                         <Tree mode={this.state.mode} data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove} onEdit={this.props.onEdit} onCategorySelect={this.props.onCategorySelect}/>
                     }
                 </div>
 

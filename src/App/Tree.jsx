@@ -1,11 +1,19 @@
 import React, {Component} from 'react';
 import TreeNode from './TreeNode';
+import {TREE_MODE} from './Consts';
 
 export default class Tree extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {data: props.data};
+        this.state = {data: props.data, mode: props.mode};
+    }
+
+    componentWillReceiveProps(nextProps) {
+        
+        this.setState({
+            mode: nextProps.mode
+        });
     }
 
     onSelect(node) {
@@ -28,6 +36,7 @@ export default class Tree extends Component {
                     <ul className="category-tree">
                         {this.state.data.map(child =>
                             <TreeNode
+                                mode={this.state.mode}
                                 key={child.id}
                                 data={child}
                                 onCategorySelect={this.onSelect.bind(this)}
