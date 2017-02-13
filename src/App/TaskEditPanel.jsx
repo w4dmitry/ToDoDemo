@@ -13,7 +13,7 @@ export default class TaskEditPanel extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { id: this.props.task.id, name: this.props.task.name, description: this.props.task.description, done: this.props.task.done };
+        this.state = { id: this.props.task.id, name: this.props.task.name, description: this.props.task.description, done: this.props.task.done, categoryId: this.props.task.categoryId };
     }
 
     onSaveChanges() {

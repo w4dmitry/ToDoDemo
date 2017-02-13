@@ -17,8 +17,6 @@ export default class CategoryPanel extends Component {
         this.setState({
             mode: nextProps.mode
         });
-
-        console.log(nextProps);
     }
     
     render() {
@@ -32,7 +30,14 @@ export default class CategoryPanel extends Component {
                     {this.state.data.length === 0 ?
                          <MessagePanel value="Add category"/>
                          :
-                         <Tree mode={this.state.mode} data={this.state.data} onAdd={this.props.onAddSubCategory} onRemove={this.props.onRemove} onEdit={this.props.onEdit} onCategorySelect={this.props.onCategorySelect}/>
+                         <Tree
+                            mode={this.state.mode}
+                            data={this.state.data}
+                            onAdd={this.props.onAddSubCategory}
+                            onRemove={this.props.onRemove}
+                            onEdit={this.props.onEdit}
+                            onCategorySelect={this.props.onCategorySelect}
+                            onMove={this.props.onMove}/>
                     }
                 </div>
 

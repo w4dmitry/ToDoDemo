@@ -42,7 +42,8 @@ export default class Tree extends Component {
                                 onCategorySelect={this.onSelect.bind(this)}
                                 onAdd={this.props.onAdd}
                                 onRemove={this.props.onRemove}
-                                onEdit={this.props.onEdit} />)}
+                                onEdit={this.props.onEdit}
+                                onMove={this.props.onMove}/>)}
                     </ul>
                 </div>
             </div>

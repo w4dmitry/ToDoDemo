@@ -1,3 +1,5 @@
+//call_received
+// keyboard_backspace
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import IconButton from 'material-ui/IconButton';
@@ -61,6 +63,12 @@ export default class TreeNode extends Component {
             this.props.onEdit(this.props.data.id);
     }
 
+    onMove() {
+
+        if (this.props.onMove)
+            this.props.onMove(this.props.data.id);
+    }
+
     render() {
 
         if (!this.state.children)
@@ -111,7 +119,7 @@ export default class TreeNode extends Component {
                             </div>
                             :
                             <IconButton tooltip="Move to this category" style={{ display: 'inline-block', verticalAlign: 'middle' }} onClick={() => this.onMove()}>
-                                <FontIcon className="material-icons" style={{ fontSize: '12px' }}>turned_in</FontIcon>
+                                <FontIcon className="material-icons" style={{ fontSize: '12px' }}>subdirectory_arrow_left</FontIcon>
                             </IconButton>
                         }
 

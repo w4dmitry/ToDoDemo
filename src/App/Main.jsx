@@ -15,6 +15,7 @@ import Toggle from 'material-ui/Toggle';
 import Divider from 'material-ui/Divider';
 
 import TaskShowPanel from './TaskShowPanel';
+import TaskShowPanel2 from './TaskShowPanel2';
 import TaskEditPanel from './TaskEditPanel';
 
 import CategoryPanel from './CategoryPanel';
@@ -66,7 +67,10 @@ export class Main extends Component {
       data: [],
       selectedCategory: null,
       mode: TREE_MODE.NODE_BUILD,
+      
       task: null,
+      newTaskCategoryId: null,
+
       hintPopup: {
         open: false,
         message: '',
@@ -382,6 +386,29 @@ export class Main extends Component {
     prevTask.description = task.description;
     prevTask.done = task.done;
 
+    if(task.categoryId !== this.state.newTaskCategoryId) {
+      
+      prevTask.categoryId = this.state.newTaskCategoryId;
+      
+      let newCategory = this.findCategory(this.state.newTaskCategoryId, this.state.data);
+      let oldCategory = this.findCategory(task.categoryId, this.state.data);
+
+      // Move task
+      let taskIndex = -1;
+      for(var i = 0, length = oldCategory.tasks.length; i < length; i++) {
+          if (oldCategory.tasks[i].id === task.id) {
+            taskIndex = i;
+            break;
+          }
+      }
+
+      if(taskIndex > -1) {
+        oldCategory.tasks.splice(taskIndex, 1);
+        newCategory.tasks.unshift(prevTask);
+      }
+
+    }
+
      this.setState({
         mode: TREE_MODE.NODE_BUILD
       })
@@ -391,6 +418,13 @@ export class Main extends Component {
   cancelTask() {
       this.setState({
         mode: TREE_MODE.NODE_BUILD
+      })
+  }
+
+  onMoveTaskToCategory(id) {
+
+      this.setState({
+        newTaskCategoryId: id
       })
   }
 
@@ -439,21 +473,25 @@ export class Main extends Component {
                   onAddSubCategory={id => this.onAddSubCategory(id)}
                   onRemove={id => this.onRemove(id)}
                   onEdit={id => this.onEdit(id)}
-                  onCategorySelect={id => this.onSelected(id)} />
+                  onCategorySelect={id => this.onSelected(id)}
+                  onMove={id => this.onMoveTaskToCategory(id)} />
               </div>
 
               <div style={{ alignSelf: 'top', width: '50%' }}>
                 {this.state.selectedCategory !== null ?
                 
                    (this.state.mode === TREE_MODE.NODE_BUILD ?
-                      <TaskShowPanel
+                      <TaskShowPanel2
                           data={this.state.selectedCategory.tasks}
                           categoryId={this.state.selectedCategory.id}
                           taskId={this.taskId}
                           addTask={(id,task) => this.addTask(id, task)}
                           editTask={(id) => this.editTask(id)}/>
                       :
-                      <TaskEditPanel task={this.state.task} saveChanges={task => this.saveTask(task)} cancleChanges={() => this.cancelTask()}/>
+                      <TaskEditPanel
+                        task={this.state.task}
+                        saveChanges={task => this.saveTask(task)}
+                        cancleChanges={() => this.cancelTask()}/>
                    )
                   :
                   null
@@ -464,7 +502,11 @@ export class Main extends Component {
 
           </Paper>
 
-          <Snackbar open={this.state.hintPopup.open} message={this.state.hintPopup.message} autoHideDuration={this.constants.hintAutoHideDuration} contentStyle={this.state.hintPopup.style} />
+          <Snackbar
+            open={this.state.hintPopup.open}
+            message={this.state.hintPopup.message}
+            autoHideDuration={this.constants.hintAutoHideDuration}
+            contentStyle={this.state.hintPopup.style} />
 
           <ModalDialogOkCancel
             ref="modalDialog"
