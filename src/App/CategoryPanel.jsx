@@ -18,7 +18,13 @@ export default class CategoryPanel extends Component {
             mode: nextProps.mode
         });
     }
-    
+
+    onMoveTaskToCategory(id) {
+
+        if (this.props.onMove)
+            this.props.onMove(id);
+    }
+
     render() {
         
         return (
@@ -37,7 +43,7 @@ export default class CategoryPanel extends Component {
                             onRemove={this.props.onRemove}
                             onEdit={this.props.onEdit}
                             onCategorySelect={this.props.onCategorySelect}
-                            onMove={this.props.onMove}/>
+                            onMove={id => this.onMoveTaskToCategory(id)}/>
                     }
                 </div>
 

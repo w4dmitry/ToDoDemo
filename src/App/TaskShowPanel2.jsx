@@ -25,6 +25,7 @@ export default class TaskShowPanel extends Component {
         };
 
         this.state = {
+            filter: props.filter,
             data: props.data,
             categoryId: props.categoryId,
             taskId: props.taskId,
@@ -91,6 +92,7 @@ export default class TaskShowPanel extends Component {
     componentWillReceiveProps(nextProps) {
         
         this.setState({
+            filter: nextProps.filter,
             data: nextProps.data,
             categoryId: nextProps.categoryId,
             taskId: nextProps.taskId
@@ -103,7 +105,25 @@ export default class TaskShowPanel extends Component {
             this.props.editTask(id);
     }
 
+    isTaskVisible(task) {
+
+        if(this.state.filter.done === true && task.done === false)
+            return false;
+        
+        if(!this.state.filter.text)
+            return true;
+
+        if(task.name.includes(this.state.filter.text) || task.description.includes(this.state.filter.text))
+            return true;
+
+        return false;
+    }
+
     render() {
+
+        let data = [];
+        this.state.data.forEach(task => this.isTaskVisible(task) ? data.push(task) : null );
+
         return (
 
             <div>
@@ -113,12 +133,12 @@ export default class TaskShowPanel extends Component {
 
                 <div style={{ alignSelf: 'strech', paddingLeft: 15, marginTop: 30 }}>
 
-                    {this.state.data.length === 0 ?
+                    {data.length === 0 ?
                         <MessagePanel value="Add task" />
                         :
                         <Table selectable={false}>
                             <TableBody displayRowCheckbox={false}>
-                                {this.state.data.map(task =>
+                                {data.map(task =>
                                     <TableRow key={task.id}>
                                         <TableRowColumn style={{width: '50px', padding:0}}>
                                             <Checkbox style={{marginRight: "auto", marginLeft: "10px"}} checked={task.done} />

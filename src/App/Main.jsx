@@ -7,16 +7,13 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import LinearProgress from 'material-ui/LinearProgress';
-import TextField from 'material-ui/TextField';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import ContentClear from 'material-ui/svg-icons/content/clear';
 import Paper from 'material-ui/Paper';
-import Toggle from 'material-ui/Toggle';
 import Divider from 'material-ui/Divider';
 
 import TaskShowPanel from './TaskShowPanel';
 import TaskShowPanel2 from './TaskShowPanel2';
 import TaskEditPanel from './TaskEditPanel';
+import TaskFilter from './TaskFilter';
 
 import CategoryPanel from './CategoryPanel';
 import ModalDialogOkCancel from './ModalDialogOkCancel';
@@ -65,9 +62,14 @@ export class Main extends Component {
 
     this.state = {
       data: [],
+      doneProgress: 0,
       selectedCategory: null,
       mode: TREE_MODE.NODE_BUILD,
       
+      taskFilter: {
+        done: false,
+        text: ''
+      },
       task: null,
       newTaskCategoryId: null,
 
@@ -289,8 +291,8 @@ export class Main extends Component {
   }
 
   onAdd(categoryName) {
-
     this.addCategory(0, categoryName);
+    this.updateProgress();
   }
 
   onAddSubCategory(id) {
@@ -305,6 +307,8 @@ export class Main extends Component {
         id: id
       }
     })
+
+    this.updateProgress();
   }
 
   onRemove(id) {
@@ -335,6 +339,7 @@ export class Main extends Component {
 
   addTask(id, task) {
    this.enumerateTasks(this.state.data);
+   this.updateProgress();
   }
 
   dialogResultCallback(result) {
@@ -360,14 +365,18 @@ export class Main extends Component {
     })
   }
 
-  onToggle(event, state)
+  onFilterToggle(state)
   {
-      let mode = TREE_MODE.NODE_BUILD;
-      if(state === false)
-        mode = TREE_MODE.NODE_SELECT;
       this.setState({
-        mode: mode
+        taskFilter: { done: state, text: this.state.taskFilter.text}
       })        
+  }
+
+  onFilterText(text)
+  {
+      this.setState({
+        taskFilter: { done: this.state.taskFilter.done, text: text}
+      })     
   }
 
   editTask(id) {
@@ -379,15 +388,15 @@ export class Main extends Component {
   }
 
   saveTask(task) {
-    
+
     let prevTask = this.findTask(task.id, this.state.data);
 
     prevTask.name = task.name;
     prevTask.description = task.description;
     prevTask.done = task.done;
 
-    if(task.categoryId !== this.state.newTaskCategoryId) {
-      
+    if(this.state.newTaskCategoryId !== null && task.categoryId !== this.state.newTaskCategoryId) {
+
       prevTask.categoryId = this.state.newTaskCategoryId;
       
       let newCategory = this.findCategory(this.state.newTaskCategoryId, this.state.data);
@@ -409,10 +418,11 @@ export class Main extends Component {
 
     }
 
-     this.setState({
+    this.setState({
         mode: TREE_MODE.NODE_BUILD
       })
-    
+
+    this.updateProgress();    
   }
   
   cancelTask() {
@@ -422,14 +432,60 @@ export class Main extends Component {
   }
 
   onMoveTaskToCategory(id) {
-
       this.setState({
         newTaskCategoryId: id
       })
   }
 
-  render() {
+  countCategories(data) {
+    
+    let results = {notDoneCategories: 0, doneCategories: 0};
 
+    // Handle category
+    data.forEach(function(cat) {
+      
+      if(cat.tasks.length > 0) {
+
+        let notDone = false;
+        for (let i = 0; i < cat.tasks.length; i++) { 
+          if(!cat.tasks[i].done) {
+            notDone = true;
+            break;
+          }
+        }
+
+        if(notDone)
+          results.notDoneCategories++;
+        else
+          results.doneCategories++;
+      }
+      else {
+        results.doneCategories++;
+      }
+
+      if(cat.children.length > 0)
+      {
+        let childrenResults = this.countCategories(cat.children);
+        results.doneCategories += childrenResults.doneCategories;
+        results.notDoneCategories += cildrenResults.notDoneCategories;
+      }
+    });
+
+    return results;
+  }
+
+  updateProgress() {
+
+    let count = this.countCategories(this.state.data);
+    let totalCategories = (count.notDoneCategories + count.doneCategories);
+    let doneProgress = totalCategories > 0 ?(count.doneCategories * 100) / totalCategories : 0;
+    
+    this.setState({
+        doneProgress: doneProgress
+    })
+  }
+
+  render() {
     return (
       <MuiThemeProvider>
 
@@ -443,21 +499,14 @@ export class Main extends Component {
                 <h5>To-Do List</h5>
               </div>
 
-              <div style={{ alignSelf: 'center' }}>
-                <div style={{ width: 200, display: 'inline-block', verticalAlign: 'middle' }}>
-                  <Toggle label="Show done" labelPosition="right" defaultToggled={true} style={{ fontSize: '18px' }} onToggle={(event, state) => this.onToggle(event, state)} />
-                </div>
-                <div style={{ width: 200, display: 'inline-block', verticalAlign: 'middle' }}>
-                  <TextField style={{ width: 200, fontSize: '18px' }} hintText="Task filter" />
-                </div>
-                <div style={{ marginLeft: 20, display: 'inline-block', verticalAlign: 'middle' }}>
-                  <FloatingActionButton mini={true} style={{ fontSize: '3px' }} ><ContentClear /></FloatingActionButton>
-                </div>
-              </div>
+             <TaskFilter 
+                filter={this.state.taskFilter}
+                onDoneToggle={state => this.onFilterToggle(state)}
+                onTextChanged={text => this.onFilterText(text)}/>
 
             </div>
 
-            <LinearProgress mode="determinate" value={60} style={{ height: 10 }} />
+            <LinearProgress mode="determinate" value={this.state.doneProgress} style={{ height: 10 }} />
 
           </Paper>
 
@@ -482,6 +531,7 @@ export class Main extends Component {
                 
                    (this.state.mode === TREE_MODE.NODE_BUILD ?
                       <TaskShowPanel2
+                          filter={this.state.taskFilter}
                           data={this.state.selectedCategory.tasks}
                           categoryId={this.state.selectedCategory.id}
                           taskId={this.taskId}

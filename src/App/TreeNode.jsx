@@ -64,7 +64,6 @@ export default class TreeNode extends Component {
     }
 
     onMove() {
-
         if (this.props.onMove)
             this.props.onMove(this.props.data.id);
     }

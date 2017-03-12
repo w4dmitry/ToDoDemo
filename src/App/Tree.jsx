@@ -24,7 +24,6 @@ export default class Tree extends Component {
         this.setState({selected: node});
         node.setState({selected: true});
         if (this.props.onCategorySelect) {
-            //this.props.onCategorySelect(node);
             this.props.onCategorySelect(node.props.data.id);
         }
     }
